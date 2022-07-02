@@ -2,27 +2,27 @@ from concurrent import futures
 from msvcrt import kbhit
 import time
 import grpc
-import SDpb2
-import SDpb2_grpc
+import SD_pb2
+import SD_pb2_grpc
 import RWLock
 import ast
 import threading
 import datetime
 import logging
 lock = RWLock.RWLock()
-
-class GreeterServicer(SDpb2_grpc.GreeterServicer):
-    def set(self, request, context):            
+dicionario = {}
+class GreeterServicer(SD_pb2_grpc.GreeterServicer):
+    def set(request):            
         lock.writer_acquire()
 
         try: 
-            if request.chave in dicionario:
-                return SDpb2.MessageReply(e='ERROR')
+            if request.cid_id in dicionario:
+                return SD_pb2.HelloReply(dados_client='ERROR')
             else:
-                dicionario[request.chave] = (1)
+                dicionario[request.cid_id] = (1)
                 print(dicionario)
 
-                return SDpb2.MessageReply(e='SUCCESS', id = dicionario[request.chave][0])
+                return SD_pb2.HelloReply(dados_client='SUCCESS', cid_id=dicionario[request.cid_id])
         finally:
             lock.writer_release()
 
@@ -30,7 +30,7 @@ class GreeterServicer(SDpb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         print("SayHello Request Made:")
         print(request)
-        hello_reply = SDpb2.HelloReply()
+        hello_reply = SD_pb2.HelloReply()
         hello_reply.message = f"{request.greeting} {request.name}"
 
         return hello_reply
@@ -38,8 +38,8 @@ class GreeterServicer(SDpb2_grpc.GreeterServicer):
 
 def menu():
     while True:
-        channel = grpc.insecure_channel('localhost:50051')
-        stub = SDpb2_grpc.GreeterServicer(channel)
+        #channel = grpc.insecure_channel('localhost:50051')
+        #stub = SD_pb2_grpc.GreeterServicer(channel)
 
         print("1 - Cadastrar cliente")
         #print("2 - ParrotSaysHello - Server Side Streaming")
@@ -51,8 +51,14 @@ def menu():
             break
         if inp == "1":
             valor_digitado = input("Digite o valor: ")
-            response = stub.set(SDpb2_grpc.HelloRequest(chave = valor_digitado))
-            print("Inserção: " + response.e + " - " + str(response.id))
+            response = GreeterServicer.set(SD_pb2.HelloRequest(cid_id = int(valor_digitado)))
+            print("Inserção: " + response.dados_client + " - " + str(response.cid_id))
+            thread_read = ThreadRead()
+            thread_write = ThreadWrite(thread_read)
+            #thread_read.setDaemon(True)
+            #thread_write.setDaemon(True)
+            #thread_read.start()
+            thread_write.start()
         else:
             print('Opção inválida!')
             print('\n')
@@ -73,7 +79,7 @@ def read_db():
 #realiza escrita no arquivo
 def write_db(t):
     while True:
-        time.sleep(t)
+        #time.sleep(t)
         lock.writer_acquire()
         try:
             f = open('file.txt','w')
@@ -105,7 +111,7 @@ class ThreadRead (threading.Thread):
 
 def open_serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    SDpb2_grpc.add_GreeterServicer_to_server(GreeterServicer(), server)
+    SD_pb2_grpc.add_GreeterServicer_to_server(GreeterServicer(), server)
     server.add_insecure_port("localhost:50051")
     server.start()
     server.wait_for_termination()
@@ -113,5 +119,3 @@ def open_serve():
 if __name__ == "__main__":
     menu()
     logging.basicConfig()
-    thread_read = ThreadRead()
-    

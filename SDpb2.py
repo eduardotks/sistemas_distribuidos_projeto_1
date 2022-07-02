@@ -23,21 +23,21 @@ _HELLOREPLY = DESCRIPTOR.message_types_by_name['HelloReply']
 _DELAYEDREPLY = DESCRIPTOR.message_types_by_name['DelayedReply']
 HelloRequest = _reflection.GeneratedProtocolMessageType('HelloRequest', (_message.Message,), {
   'DESCRIPTOR' : _HELLOREQUEST,
-  '__module__' : 'greet_pb2'
+  '__module__' : 'SDpb2'
   # @@protoc_insertion_point(class_scope:greet.HelloRequest)
   })
 _sym_db.RegisterMessage(HelloRequest)
 
 HelloReply = _reflection.GeneratedProtocolMessageType('HelloReply', (_message.Message,), {
   'DESCRIPTOR' : _HELLOREPLY,
-  '__module__' : 'greet_pb2'
+  '__module__' : 'SDpb2'
   # @@protoc_insertion_point(class_scope:greet.HelloReply)
   })
 _sym_db.RegisterMessage(HelloReply)
 
 DelayedReply = _reflection.GeneratedProtocolMessageType('DelayedReply', (_message.Message,), {
   'DESCRIPTOR' : _DELAYEDREPLY,
-  '__module__' : 'greet_pb2'
+  '__module__' : 'SDpb2'
   # @@protoc_insertion_point(class_scope:greet.DelayedReply)
   })
 _sym_db.RegisterMessage(DelayedReply)

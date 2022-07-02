@@ -10,11 +10,11 @@ class GreeterStub(object):
     """
 
     def __init__(self, channel):
-        """Constructor.
-
-        Args:
-            channel: A grpc.Channel.
-        """
+        self.set = channel.unary_unary(
+                '/projeto.Greeter/set',
+                request_serializer=projeto__pb2.ChaveValor.SerializeToString,
+                response_deserializer=projeto__pb2.MessageReply.FromString,
+        )
         self.SayHello = channel.unary_unary(
                 '/greet.Greeter/SayHello',
                 request_serializer=greet__pb2.HelloRequest.SerializeToString,
@@ -26,7 +26,11 @@ class GreeterStub(object):
 class GreeterServicer(object):
     """The greeting service definition.
     """
-
+    def set(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
     def SayHello(self, request, context):
         """Unary
         """
@@ -38,6 +42,11 @@ class GreeterServicer(object):
 
 def add_GreeterServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'set': grpc.unary_unary_rpc_method_handler(
+                servicer.set,
+                request_deserializer=projeto__pb2.ChaveValor.FromString,
+                response_serializer=projeto__pb2.MessageReply.SerializeToString,
+            ),
             'SayHello': grpc.unary_unary_rpc_method_handler(
                     servicer.SayHello,
                     request_deserializer=greet__pb2.HelloRequest.FromString,
@@ -53,6 +62,22 @@ def add_GreeterServicer_to_server(servicer, server):
 class Greeter(object):
     """The greeting service definition.
     """
+    @staticmethod
+    def set(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/projeto.Greeter/set',
+            projeto__pb2.ChaveValor.SerializeToString,
+            projeto__pb2.MessageReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def SayHello(request,

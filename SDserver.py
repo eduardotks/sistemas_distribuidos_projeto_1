@@ -1,11 +1,30 @@
 from concurrent import futures
+from msvcrt import kbhit
 import time
-
 import grpc
 import SDpb2
 import SDpb2_grpc
+import RWLock
+import ast
+import threading
+import datetime
+import logging
+lock = RWLock.RWLock()
 
 class GreeterServicer(SDpb2_grpc.GreeterServicer):
+    def set(self, request, context):            
+        lock.writer_acquire()
+
+        try: 
+            if request.chave in dicionario:
+                return SDpb2.MessageReply(e='ERROR')
+            else:
+                dicionario[request.chave] = (1)
+                print(dicionario)
+
+                return SDpb2.MessageReply(e='SUCCESS', id = dicionario[request.chave][0])
+        finally:
+            lock.writer_release()
 
 
     def SayHello(self, request, context):
@@ -18,16 +37,70 @@ class GreeterServicer(SDpb2_grpc.GreeterServicer):
     
 
 def menu():
-    with grpc.insecure_channel('localhost:50051') as channel:
-        stub = SDpb2_grpc.GreeterStub(channel)
-        print("1. Cadastrar cliente")
-        #print("2. ParrotSaysHello - Server Side Streaming")
+    while True:
+        channel = grpc.insecure_channel('localhost:50051')
+        stub = SDpb2_grpc.GreeterServicer(channel)
 
-        rpc_call = input("Escolha a opcao: ")
+        print("1 - Cadastrar cliente")
+        #print("2 - ParrotSaysHello - Server Side Streaming")
+        print("0 - Sair do programa")
 
-        if rpc_call == "1":
-            print("Vamos então cadastrar o cliente:")
-            open_serve()
+        inp = input("Escolha a opcao: ")
+
+        if inp.lower() == '0':
+            break
+        if inp == "1":
+            valor_digitado = input("Digite o valor: ")
+            response = stub.set(SDpb2_grpc.HelloRequest(chave = valor_digitado))
+            print("Inserção: " + response.e + " - " + str(response.id))
+        else:
+            print('Opção inválida!')
+            print('\n')
+
+
+
+#realiza leitura do arquivo
+def read_db():
+    lock.writer_acquire
+    try:
+        f = open('file.txt','r')
+        global dicionario
+        dicionario = ast.literal_eval(f.read())
+        
+    finally:
+        lock.writer_release
+
+#realiza escrita no arquivo
+def write_db(t):
+    while True:
+        time.sleep(t)
+        lock.writer_acquire()
+        try:
+            f = open('file.txt','w')
+            f.write(str(dicionario))
+            f.close()
+            
+        finally:
+            lock.writer_release()
+
+class ThreadWrite(threading.Thread):
+    def __init__(self,counter):
+        threading.Thread.__init__(self)
+        self.counter = counter
+    def run(self):
+        print('Starting ThreadWrite')
+        write_db(self.counter)
+
+class ThreadRead (threading.Thread):
+   def __init__(self):
+      threading.Thread.__init__(self)
+
+   def run(self):
+      print ("Starting ThreadRead")
+      read_db()
+      print ("Exiting ThreadRead")
+
+
 #***************************************************************************************
 
 def open_serve():
@@ -39,4 +112,6 @@ def open_serve():
 
 if __name__ == "__main__":
     menu()
+    logging.basicConfig()
+    thread_read = ThreadRead()
     

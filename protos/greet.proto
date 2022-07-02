@@ -1,0 +1,47 @@
+syntax = "proto3";
+package greet;
+
+// The greeting service definition.
+service Greeter {
+	// Unary
+	rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+  string greeting = 2;
+}
+
+// The response message containing the greetings.
+message HelloReply {
+  string message = 1;
+}
+
+//---------------------------------------------------
+service Greeter {
+	//Servidor
+	rpc insert_client(HelloRequest) returns (HelloReply) {}
+	rpc update_client(HelloRequest) returns (HelloReply) {}
+	rpc recovery_client(HelloRequest) returns (HelloReply) {}
+	rpc delete_client(HelloRequest) returns (HelloReply) {}
+
+	//Cliente
+	rpc insert_task(HelloRequest) returns (HelloReply) {}
+	rpc update_task(HelloRequest) returns (HelloReply) {}
+	rpc list_task(HelloRequest) returns (HelloReply) {}
+	rpc delete_task(HelloRequest) returns (HelloReply) {}
+}
+
+//Cliente
+message HelloRequest {
+	int64 cid_id = 1; //CID
+	string title_task = 2; //titulo
+	string desc_task = 3; //descrição
+}
+
+//Servidor - 
+message HelloReply {
+	int64 cid_id = 1; //CID
+	string dados_client = 2; //cliente dados
+}

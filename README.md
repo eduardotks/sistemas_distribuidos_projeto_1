@@ -2,12 +2,14 @@
 Projeto 1 para sistemas distribuídos.
 
 
-#Como rodar
+# Como rodar
 
-###Utilizar o comando 
+### Utilizar o comando 
 `py Sdserver.py`
+
 Criar um cliente
 
-###Utilizar o comando
+### Utilizar o comando
 `py Sdclient.py`
+
 Criar as tasks do cliente

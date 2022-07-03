@@ -12,17 +12,21 @@ import logging
 lock = RWLock.RWLock()
 dicionario = {}
 class GreeterServicer(SD_pb2_grpc.GreeterServicer):
-    def set(request):            
+    def set(request, request2):            
         lock.writer_acquire()
 
         try: 
             if request.cid_id in dicionario:
-                return SD_pb2.HelloReply(dados_client='ERROR')
+                return SD_pb2.HelloReply(dados_client='ERROR',
+                cid_id = dicionario[request.cid_id][0])
             else:
-                dicionario[request.cid_id] = (1)
-                print(dicionario)
+                #dicionario = dict(zip(str(request.cid_id) , request2.dados_client))
+                dicionario[request.cid_id] = request2.dados_client
+                    
+                #dicionario[request2.dados_client] = (request.dados_client)
+                print(">>", dicionario)
 
-                return SD_pb2.HelloReply(dados_client='SUCCESS', cid_id=dicionario[request.cid_id])
+                return SD_pb2.HelloReply(dados_client='SUCCESS')
         finally:
             lock.writer_release()
 
@@ -51,10 +55,12 @@ def menu():
             break
         if inp == "1":
             valor_digitado = input("Digite o valor: ")
-            response = GreeterServicer.set(SD_pb2.HelloRequest(cid_id = int(valor_digitado)))
+            dados_cliente = input("Digite a descrição: ")
+            response = GreeterServicer.set(SD_pb2.HelloReply(cid_id = int(valor_digitado)), SD_pb2.HelloReply(dados_client = dados_cliente))
             print("Inserção: " + response.dados_client + " - " + str(response.cid_id))
-            thread_read = ThreadRead()
-            thread_write = ThreadWrite(thread_read)
+            #thread_read = ThreadRead()
+            print(dicionario)
+            thread_write = ThreadWrite(dicionario)
             #thread_read.setDaemon(True)
             #thread_write.setDaemon(True)
             #thread_read.start()

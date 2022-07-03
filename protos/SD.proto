@@ -20,6 +20,7 @@ message HelloRequest {
 	int64 cid_id = 1; //CID
 	string title_task = 2; //titulo
 	string desc_task = 3; //descrição
+	
 }
 
 //Servidor - 

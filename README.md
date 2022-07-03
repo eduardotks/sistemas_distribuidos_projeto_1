@@ -10,12 +10,12 @@ Considerando que já tem instalado o Python no computador e grpcio e protobuf:
 `pip install protobuf`
 
 ### Utilizar o comando 
-`py Sdserver.py`
+`py SDserver.py`
 
 Criar um cliente
 
 ### Utilizar o comando
-`py Sdclient.py`
+`py SDclient.py`
 
 Criar as tasks do cliente
 

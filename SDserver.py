@@ -29,7 +29,22 @@ class GreeterServicer(SD_pb2_grpc.GreeterServicer):
                 return SD_pb2.HelloReply(dados_client='SUCCESS')
         finally:
             lock.writer_release()
+    def get(client_id):
 
+        thread_read = ThreadRead()
+        thread_read.start()
+
+        try:
+            if client_id.cid_id in dicionario:
+                dados = dicionario.get(client_id.cid_id)
+                if(dados == ''):
+                    print('Não existe o CID: ', {client_id.cid_id})
+                    return SD_pb2.HelloReply(dados_client='ERROR')
+                else:
+                    print('O valor do CID é: ', {client_id.cid_id}, 'Dados do Cliente:', {dados})
+
+        finally:
+            lock.reader_release()
 
     def SayHello(self, request, context):
         print("SayHello Request Made:")
@@ -46,7 +61,7 @@ def menu():
         #stub = SD_pb2_grpc.GreeterServicer(channel)
 
         print("1 - Cadastrar cliente")
-        #print("2 - ParrotSaysHello - Server Side Streaming")
+        print("2 - Get cliente")
         print("0 - Sair do programa")
 
         inp = input("Escolha a opcao: ")
@@ -65,13 +80,38 @@ def menu():
             #thread_write.setDaemon(True)
             #thread_read.start()
             thread_write.start()
+        elif inp == "2":
+            print("Digite o CID do cliente: ")
+            id = input()
+
+            response = GreeterServicer.get(SD_pb2.HelloReply(cid_id = int(id)))
+            if(response == 'ERROR'):
+                print('Não existe o CID: ' + response.client_id)
+                break
         else:
             print('Opção inválida!')
             print('\n')
 
 
 
-#realiza leitura do arquivo
+class ThreadRead (threading.Thread):
+   def __init__(self):
+      threading.Thread.__init__(self)
+
+   def run(self):
+      print ("Starting ThreadRead")
+      read_db()
+      print ("Exiting ThreadRead")
+
+class ThreadWrite(threading.Thread):
+    def __init__(self,counter):
+        threading.Thread.__init__(self)
+        self.counter = counter
+    def run(self):
+        print('Starting ThreadWrite')
+        write_db(self.counter)
+        print('Exiting ThreadWrite')
+
 def read_db():
     lock.writer_acquire
     try:
@@ -82,10 +122,8 @@ def read_db():
     finally:
         lock.writer_release
 
-#realiza escrita no arquivo
 def write_db(t):
     while True:
-        #time.sleep(t)
         lock.writer_acquire()
         try:
             f = open('file.txt','w')
@@ -94,23 +132,6 @@ def write_db(t):
             
         finally:
             lock.writer_release()
-
-class ThreadWrite(threading.Thread):
-    def __init__(self,counter):
-        threading.Thread.__init__(self)
-        self.counter = counter
-    def run(self):
-        print('Starting ThreadWrite')
-        write_db(self.counter)
-
-class ThreadRead (threading.Thread):
-   def __init__(self):
-      threading.Thread.__init__(self)
-
-   def run(self):
-      print ("Starting ThreadRead")
-      read_db()
-      print ("Exiting ThreadRead")
 
 
 #***************************************************************************************
